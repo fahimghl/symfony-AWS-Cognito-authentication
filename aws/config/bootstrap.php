@@ -1,12 +1,15 @@
 <?php
-require_once __DIR__ . '/../vendor/autoload.php';
+use App\Bridge\CognitoClient;
+use Aws\Sdk;
 
-$config = require(__DIR__ . '/config.php');
+require dirname ( __DIR__ ) . '/../vendor/autoload.php';
 
-$aws = new \Aws\Sdk($config);
+$config = require __DIR__ . '/config.php';
+
+$aws = new Sdk($config);
 $cognitoClient = $aws->createCognitoIdentityProvider();
 
-$client = new \pmill\AwsCognito\CognitoClient($cognitoClient);
+$client = new CognitoClient( $cognitoClient );
 $client->setAppClientId($config['app_client_id']);
 $client->setAppClientSecret($config['app_client_secret']);
 $client->setRegion($config['region']);

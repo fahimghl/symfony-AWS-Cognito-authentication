@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use App\Bridge\CognitoClient;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -20,13 +21,24 @@ class UserProvider implements UserProviderInterface
      *
      * @throws UsernameNotFoundException if the user is not found
      */
-    public function loadUserByUsername($username)
+    public function loadUserByUsername ( $username )
     {
         // Load a User object from your data source or throw UsernameNotFoundException.
         // The $username argument may not actually be a username:
         // it is whatever value is being returned by the getUsername()
         // method in your User class.
-        throw new \Exception('TODO: fill in loadUserByUsername() inside '.__FILE__);
+        //throw new \Exception('TODO: fill in loadUserByUsername() inside '.__FILE__);
+        /**
+         * @var CognitoClient $client
+         */
+        $client = require dirname ( __DIR__ ) . '/../aws/config/bootstrap.php';
+        $authenticatioReponse = $client->findByusername ( $username );
+        if (count ( $authenticatioReponse['Users'] ) === 0) {
+            throw new UserNotFoundException();
+        }
+        $user = new User();
+        $user->setUsername ( $username );
+        return $user;
     }
 
     /**
@@ -42,21 +54,22 @@ class UserProvider implements UserProviderInterface
      *
      * @return UserInterface
      */
-    public function refreshUser(UserInterface $user)
+    public function refreshUser ( UserInterface $user )
     {
         if (!$user instanceof User) {
-            throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
+            throw new UnsupportedUserException( sprintf ( 'Invalid user class "%s".' , get_class ( $user ) ) );
         }
 
         // Return a User object after making sure its data is "fresh".
         // Or throw a UsernameNotFoundException if the user no longer exists.
-        throw new \Exception('TODO: fill in refreshUser() inside '.__FILE__);
+        throw new \Exception( 'TODO: fill in refreshUser() inside ' . __FILE__ );
     }
+
 
     /**
      * Tells Symfony to use this provider for this User class.
      */
-    public function supportsClass($class)
+    public function supportsClass ( $class )
     {
         return User::class === $class;
     }
